@@ -1,0 +1,25 @@
+
+services:
+  dataops:
+    build: .
+    restart: unless-stopped
+    command: python -m app.flow
+
+    environment:
+      PREFECT_API_URL: http://bank-prefect:4200/api
+      DATABASE_URL: ${DATABASE_URL}
+      DATA_DIR: /data
+      REPORT_DIR: /reports
+      MPLBACKEND: Agg
+
+    networks:
+      - bank-network
+
+    volumes:
+      - ./data:/data
+      - ./reports:/reports
+
+networks:
+  bank-network:
+    external: true
+

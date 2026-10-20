@@ -1,0 +1,30 @@
+services:
+  mlops-train:
+    build: .
+    restart: unless-stopped
+    command: python -m app.train_flow
+    environment: &mlops_env
+      DATABASE_URL: ${DATABASE_URL}
+      PREFECT_API_URL: http://bank-prefect:4200/api
+      MLFLOW_TRACKING_URI: http://bank-mlflow:5000
+      MLOPS_DATA_DIR: /app
+    volumes: &mlops_volumes
+      - ./train_model:/app/train_model
+      - ./evaluate_model:/app/evaluate_model
+      - ./outputs:/app/outputs
+    networks:
+      - bank-network
+
+  mlops-evaluate:
+    build: .
+    restart: unless-stopped
+    command: python -m app.evaluate_flow
+    environment: *mlops_env
+    volumes: *mlops_volumes
+    networks:
+      - bank-network
+
+networks:
+  bank-network:
+    external: true
+    name: bank-network
